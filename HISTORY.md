@@ -1,6 +1,6 @@
 # Release History
 
-## master
+## 0.1.1
 
 ### Fixes
 
