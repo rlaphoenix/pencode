@@ -36,8 +36,10 @@ args = [
     "-g", 24, "-deblock", "-1:-1", "-psy-rd", "0.90:0", "-rc-lookahead", 120,
     "-me_range", 32, "-partitions", "p8x8,b8x8,i8x8i4x4", "-coder", "ac",
     "-fast-pskip", 0, "-fastfirstpass", 0, "-flags", "-cgop", "-mbtree", 0,  # mbtree=0 recommended by community
-    "-nal-hrd", "vbr", "-color_primaries", 1, "-color_trc", 1, "-colorspace", 1
     #"-bluray-compat",
+
+    # metadata or NAL
+    "-nal-hrd", "vbr", "-color_primaries", 1, "-color_trc", 1, "-colorspace", 1
 ]
 
 [ffmpeg.auto]
