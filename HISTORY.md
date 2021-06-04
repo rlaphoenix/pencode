@@ -2,6 +2,11 @@
 
 ## master
 
+### Fixes
+
+- Assume video resolution in a 16:9 matted canvas if it isn't 16:9 or 4:3. This is for a more accurate resolution 
+  check in the ffmpeg.auto config. See the commit `3e7a979` description for more information.
+
 ### Improvements
 
 - Use dunamai and poetry-dynamic-versioning to automatically handle versions based on git tags.
