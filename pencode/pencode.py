@@ -1,6 +1,5 @@
 import json
 import logging
-import math
 import os
 import subprocess
 import time
@@ -8,10 +7,10 @@ from collections import defaultdict
 from functools import reduce
 from pathlib import Path
 from types import MethodType
-import numpy as np
 
 import click as click
 import coloredlogs as coloredlogs
+import numpy as np
 import pytomlpp as pytomlpp
 from pymediainfo import MediaInfo
 
