@@ -73,14 +73,10 @@ def encode(file: Path, out: Path):
     log.info("Saving to: %s", out)
 
     media_info = MediaInfo.parse(file)
-    video_track = media_info.video_tracks[0]
 
+    video_track = media_info.video_tracks[0]
     video_codec = video_track.codec_id or video_track.commercial_name
     video_codec = CODEC_MAP.get(video_codec, video_codec)
-
-    dar = video_track.other_display_aspect_ratio[0].split(":")
-    sar = [int(dar[0]) * video_track.height, int(dar[1]) * video_track.width]
-    sar = ":".join([str(int(x / math.gcd(*sar))) for x in sar])
 
     ffmpeg = cfg["ffmpeg"]["args"].copy()
     for in_arg in np.where(np.array(ffmpeg) == "-i")[0]:
