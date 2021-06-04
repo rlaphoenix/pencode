@@ -145,6 +145,7 @@ def encode(file: Path, out: Path):
     Path(f"{file}.lwi").unlink(missing_ok=True)
 
     log.info("Finished Encoding: %s", file)
+    log.info("It took %d minutes" % (int(time.time() - t0) / 60))
 
 
 @click.command(context_settings=dict(
