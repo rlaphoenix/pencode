@@ -1,0 +1,73 @@
+[general]
+# these options correlate to the arguments that can be provided when running the script.
+# see -h or the click.option() definitions in the main file for info on what they do.
+ext = 'mkv'
+out = false  # false == none/null/no default
+neighbour = true
+filename = '{name}-x264'  # Do not specify the output extension. Available variables: name, ext.
+
+[vs]
+'--y4m' = 1  # disable if the script is returning non YUV data.
+script = 'C:\Users\phoenix\Git\VSMPEG\vsmpeg.vpy'
+
+[ffmpeg]
+args = [
+    # general
+    "-y", "-hide_banner",
+
+    # inputs
+    "-i", "-",  # "-" == stdin (the data from vs)
+    "-i", "{file}",  # "{file}" == input file path
+
+    # mapping
+    "-map", "0:v:0",  # video from vs only
+    "-map", "1:a:m:language:eng?", "-map", "1:s:m:language:eng?",  # get english audio & subs
+    "-map", "1:a:m:language:jpn?", "-map", "1:s:m:language:jpn?",  # get japanese audio & subs -- dual audio
+
+    # set disposition (track default for example)
+    "-disposition:a:0", "default",  # first audio track as a default track
+
+    # output codecs & formats
+    "-c:v", "libx264", "-c:a", "copy", "-c:s", "copy", "-pix_fmt", "yuv420p",
+
+    # encoding settings
+    "-preset", "slow", "-profile", "main", "-level", 3.1, "-crf", 16.0,
+    "-maxrate", "6M", "-bufsize", "4M", "-refs", 3, # refs algo: ROUND(8,388,608 / (1920 * 1080)). (but max of 4!)
+    "-g", 24, "-deblock", "-1:-1", "-psy-rd", "0.90:0", "-rc-lookahead", 120,
+    "-me_range", 32, "-partitions", "p8x8,b8x8,i8x8i4x4", "-coder", "ac",
+    "-fast-pskip", 0, "-fastfirstpass", 0, "-flags", "-cgop", "-mbtree", 0,  # mbtree=0 recommended by community
+    "-nal-hrd", "vbr", "-color_primaries", 1, "-color_trc", 1, "-colorspace", 1
+    #"-bluray-compat",
+]
+
+[ffmpeg.auto]
+# These are settings that you may want to change automatically based on resolution or codec.
+# If the values doesn't match anything defined, then whatever is (or isn't) defined above will be used.
+
+    [ffmpeg.auto.'-preset']
+    V_MPEG2 = 'veryslow'
+
+    [ffmpeg.auto.'-crf']
+    V_MPEG2 = 13.5
+
+    [ffmpeg.auto.'-profile']
+    2160 = 'high'
+    1080 = 'high'
+    720 = 'high'
+
+    [ffmpeg.auto.'-level']
+    2160 = 4.1
+    1080 = 4.1
+    720 = 4.0
+
+    [ffmpeg.auto.'-maxrate']
+    2160 = '16M'
+    1080 = '12M'
+    720 = '8M'
+    480 = '6M'
+
+    [ffmpeg.auto.'-bufsize']
+    2160 = '12M'
+    1080 = '10M'
+    720 = '6M'
+    480 = '4M'

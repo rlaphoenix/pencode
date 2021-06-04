@@ -1,0 +1,33 @@
+[build-system]
+requires = ['poetry-core>=1.0.0']
+build-backend = 'poetry.core.masonry.api'
+
+[tool.poetry]
+name = 'pencode'
+version = '0.1.0'
+description = 'Basic but fairly configurable Python FFMPEG CLI batch thing.'
+authors = ['PHOENiX <rlaphoenix@pm.me>']
+readme = 'README.md'
+homepage = 'https://github.com/rlaphoenix/pencode'
+repository = 'https://github.com/rlaphoenix/pencode'
+keywords = ['encode', 'batch', 'x264', 'ffmpeg', 'vapoursynth']
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Video"
+]
+include = ["LICENSE", "README.md"]
+
+[tool.poetry.dependencies]
+python = '>=3.7'
+pytomlpp = '^1.0.2'
+click = '^8.0.1'
+coloredlogs = '^15.0'
+pymediainfo = '^5.1.0'
+numpy = '^1.20.3'
+
+[tool.poetry.scripts]
+pencode = 'pencode.pencode:main'
