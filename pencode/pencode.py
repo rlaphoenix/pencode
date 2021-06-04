@@ -76,6 +76,12 @@ def encode(file: Path, out: Path):
     video_track = media_info.video_tracks[0]
     video_codec = video_track.codec_id or video_track.commercial_name
     video_codec = CODEC_MAP.get(video_codec, video_codec)
+    video_res = video_track.height
+    dar = [int(float(x)) for x in video_track.other_display_aspect_ratio[0].split(":")]
+    if dar[0] / (dar[1] if len(dar) > 1 else 1) not in (16 / 9, 4 / 3):
+        # if it isn't a 4:3 or 16:9 video, assume the resolution in a 16:9 matte canvas.
+        # e.g. 1920x1036 (1.85:1) would be represented as 1920x1080 (1.85 in a 16:9 matte).
+        video_res = int(video_track.width * (9 / 16))
 
     ffmpeg = cfg["ffmpeg"]["args"].copy()
     for in_arg in np.where(np.array(ffmpeg) == "-i")[0]:
@@ -85,7 +91,7 @@ def encode(file: Path, out: Path):
         ffmpeg[index] = auto_codec(key, video_codec, ffmpeg[index])
     for key in ["-profile", "-level", "-maxrate", "-bufsize"]:
         index = ffmpeg.index(key) + 1
-        ffmpeg[index] = auto_res(key, video_track.height, ffmpeg[index])
+        ffmpeg[index] = auto_res(key, video_res, ffmpeg[index])
     log.info(
         "\tProfile [%s], Level [%.1f], Bitrate [%s], CRF [%.2f] @ %s Speed",
         ffmpeg[ffmpeg.index("-profile") + 1],
