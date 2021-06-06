@@ -30,18 +30,6 @@ def dict_to_list(var: dict) -> list:
     return list(reduce(lambda x, y: x + y, var.items()))
 
 
-def auto_codec(arg, codec, default=None):
-    return cfg["ffmpeg"]["auto"][arg].get(codec, default)
-
-
-def auto_res(arg, res, default=None):
-    return next(iter(sorted(
-        [(int(x), y) for x, y in cfg["ffmpeg"]["auto"][arg].items() if int(x) <= res],
-        key=lambda x: x[0],
-        reverse=True
-    )), [None, default])[1]
-
-
 def encode(file: Path, out: Path):
     log = Logger.getLogger("encode")
     log.info("Encoding: %s", file)
@@ -62,20 +50,22 @@ def encode(file: Path, out: Path):
     ffmpeg = cfg["ffmpeg"]["args"].copy()
     for in_arg in np.where(np.array(ffmpeg) == "-i")[0]:
         ffmpeg[in_arg + 1] = ffmpeg[in_arg + 1].format_map(defaultdict(str, file=str(file)))
-    for key in ["-preset", "-crf"]:
+    for key, value in (cfg["ffmpeg"].get("auto") or {}).items():
         try:
             index = ffmpeg.index(key) + 1
         except ValueError:
             log.exit(f"Unable to apply ffmpeg.auto value for {key} as there's no default defined in ffmpeg.args")
             raise
-        ffmpeg[index] = auto_codec(key, video_codec, ffmpeg[index])
-    for key in ["-profile", "-level", "-maxrate", "-bufsize"]:
-        try:
-            index = ffmpeg.index(key) + 1
-        except ValueError:
-            log.exit(f"Unable to apply ffmpeg.auto value for {key} as there's no default defined in ffmpeg.args")
-            raise
-        ffmpeg[index] = auto_res(key, video_res, ffmpeg[index])
+        by_codec = value.get(video_codec)
+        if by_codec is not None:
+            ffmpeg[index] = by_codec
+        by_res = next(iter(sorted(
+            [(int(res), x) for res, x in value.items() if res.isdigit() and int(res) <= video_res],
+            key=lambda x: x[0],
+            reverse=True
+        )), [None])[-1]
+        if by_res is not None:
+            ffmpeg[index] = by_res
     log.info(
         "\tProfile [%s], Level [%.1f], Bitrate [%s], CRF [%.2f] @ %s Speed",
         ffmpeg[ffmpeg.index("-profile") + 1],

@@ -44,13 +44,15 @@ args = [
 
 [ffmpeg.auto]
 # These are settings that you may want to change automatically based on resolution or codec.
-# If the values doesn't match anything defined, then whatever is (or isn't) defined above will be used.
+# Both Resolution and Codec IDs are valid for all options. Priority order is: Resolution > Codec > Default.
 
     [ffmpeg.auto.'-preset']
+    1080 = 'slow'
     V_MPEG2 = 'veryslow'
 
     [ffmpeg.auto.'-crf']
-    V_MPEG2 = 13.5
+    2160 = 13.5
+    V_MPEG2 = 10
 
     [ffmpeg.auto.'-profile']
     2160 = 'high'
