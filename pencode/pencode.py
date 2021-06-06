@@ -63,10 +63,18 @@ def encode(file: Path, out: Path):
     for in_arg in np.where(np.array(ffmpeg) == "-i")[0]:
         ffmpeg[in_arg + 1] = ffmpeg[in_arg + 1].format_map(defaultdict(str, file=str(file)))
     for key in ["-preset", "-crf"]:
-        index = ffmpeg.index(key) + 1
+        try:
+            index = ffmpeg.index(key) + 1
+        except ValueError:
+            log.exit(f"Unable to apply ffmpeg.auto value for {key} as there's no default defined in ffmpeg.args")
+            raise
         ffmpeg[index] = auto_codec(key, video_codec, ffmpeg[index])
     for key in ["-profile", "-level", "-maxrate", "-bufsize"]:
-        index = ffmpeg.index(key) + 1
+        try:
+            index = ffmpeg.index(key) + 1
+        except ValueError:
+            log.exit(f"Unable to apply ffmpeg.auto value for {key} as there's no default defined in ffmpeg.args")
+            raise
         ffmpeg[index] = auto_res(key, video_res, ffmpeg[index])
     log.info(
         "\tProfile [%s], Level [%.1f], Bitrate [%s], CRF [%.2f] @ %s Speed",
