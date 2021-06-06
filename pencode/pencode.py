@@ -6,20 +6,15 @@ import time
 from collections import defaultdict
 from functools import reduce
 from pathlib import Path
-from types import MethodType
 
 import click as click
-import coloredlogs as coloredlogs
 import numpy as np
 import pytomlpp as pytomlpp
 from pymediainfo import MediaInfo
 
-HERE = Path(__file__).parent
+from pencode import Logger
 
-LOG_FORMAT = "{asctime} [{levelname[0]}] {name} : {message}"
-LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-LOG_STYLE = "{"
-LOG_FORMATTER = logging.Formatter(LOG_FORMAT, LOG_DATE_FORMAT, LOG_STYLE)
+HERE = Path(__file__).parent
 
 CODEC_MAP = {"MPEG-2 Video": "V_MPEG2"}
 
@@ -29,25 +24,6 @@ if cfg.is_file():
         cfg = pytomlpp.loads(f.read())
 else:
     cfg = {}
-
-
-def setup_log(log: logging.Logger, level: int = logging.INFO, stream_handler=False, color=True, patch=True):
-    log.setLevel(level)
-    if log.name == "root" or stream_handler:
-        sh = logging.StreamHandler()
-        sh.setFormatter(LOG_FORMATTER)
-        log.addHandler(sh)
-    if color:
-        coloredlogs.install(level=level, logger=log, fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT, style=LOG_STYLE)
-    if patch:
-        def custom_emit(self, record):
-            self.orig_emit(record)
-            if record.levelno == logging.CRITICAL:
-                raise SystemExit(-1)
-
-        handler = log.handlers[0]
-        setattr(handler, "orig_emit", handler.emit)
-        setattr(handler, "emit", MethodType(custom_emit, handler))
 
 
 def dict_to_list(var: dict) -> list:
@@ -67,7 +43,7 @@ def auto_res(arg, res, default=None):
 
 
 def encode(file: Path, out: Path):
-    log = logging.getLogger("encode")
+    log = Logger.getLogger("encode")
     log.info("Encoding: %s", file)
     log.info("Saving to: %s", out)
 
@@ -126,7 +102,7 @@ def encode(file: Path, out: Path):
     ], stdout=open(os.devnull, "w"))
     vs_pipe.wait()
     if vs_pipe.returncode != 0:
-        log.critical("An unexpected error occurred when jump-starting VS Pipe...")
+        log.exit("An unexpected error occurred when jump-starting VS Pipe...")
     log.info(" + Success")
 
     t0 = time.time()
@@ -169,15 +145,14 @@ def main(path: Path, ext: str, neighbour: bool, filename: str, verbose: int):
 
     verbose = (verbose + 1) * 10
     verbose = {10: logging.INFO, 20: logging.DEBUG}.get(verbose, verbose)  # logging has 10/20 swapped, re-swap
-    log = logging.getLogger()
-    setup_log(log, level=verbose)
+    log = Logger.getLogger(level=verbose)
 
     log.info("Config file location: %s", HERE.parent / "config.toml")
     if not cfg:
-        log.critical("Config file is invalid, empty, or not yet created.")
+        log.exit("Config file is invalid, empty, or not yet created.")
 
     if not path.exists():
-        log.critical(f"The provided path does not exist. ({path})")
+        log.exit(f"The provided path does not exist. ({path})")
 
     if path.is_dir():
         files = sorted(list(path.glob(f"**/*.{ext}")), key=lambda p: p.name)
@@ -185,7 +160,7 @@ def main(path: Path, ext: str, neighbour: bool, filename: str, verbose: int):
         files = [path]
 
     if not files:
-        log.critical(f"The provided path has no .{ext} files. ({path})")
+        log.exit(f"The provided path has no .{ext} files. ({path})")
     if len(files) == 1:
         log.info(f"Encoding: {path}")
     else:
