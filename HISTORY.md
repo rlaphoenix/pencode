@@ -1,5 +1,19 @@
 # Release History
 
+## 0.1.2
+
+### Fixes
+
+- Make sure an argument exists in ffmpeg.args before attempting to use ffmpeg.auto on it. It's needed to be able to
+  safely put in the argument in the correct position of the args list.
+
+### Improvements
+
+- Create new Logger class which inherits logging.Logger class for improved functionality. Merges the setup_log code,
+  and a new log function `exit()` for logging a critical record and then halting code execution.
+- Allow any parameter to be used with `ffmpeg.auto`.
+- Allow any parameter to use both codec and/or resolution based value automation methods.
+
 ## 0.1.1
 
 ### Fixes
